@@ -1,0 +1,12 @@
+extension: Code Runner  (Ctrl+Alt+N e Ctrl+Alt+M)
+
+
+npx knex migrate:make tb_perfil
+npx knex migrate:make tb_usuario
+
+npx knex migrate:latest
+
+npx knex migrate:rollback
+
+
+Ctrl+Alt+N e Ctrl+Alt+M
