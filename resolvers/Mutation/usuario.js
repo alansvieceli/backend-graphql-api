@@ -1,19 +1,40 @@
 const db = require('../../config/db');
+const bcrypt = require('bcrypt-nodejs');
 const { perfil: obterPerfil } = require('../Query/perfil');
 const { usuario: obterUsuario } = require('../Query/usuario');
 
-module.exports = {
+const mutations = {
+  async registrarUsuario(_, { dados }) {
+    return await mutations.novoUsuario(_, {
+      dados: {
+        nome: dados.nome,
+        email: dados.email,
+        senha: dados.senha,
+      },
+    });
+  },
+
   async novoUsuario(_, { dados }) {
     try {
       const idsPerfis = [];
-      if (dados.perfis) {
-        for (let filtro of dados.perfis) {
-          const perfil = await obterPerfil(_, {
-            filtro,
-          });
-          if (perfil) idsPerfis.push(perfil.id);
-        }
+
+      if (!dados.perfis || !dados.perfis.length) {
+        dados.perfis = [
+          {
+            nome: 'comum',
+          },
+        ];
       }
+
+      for (let filtro of dados.perfis) {
+        const perfil = await obterPerfil(_, {
+          filtro,
+        });
+        if (perfil) idsPerfis.push(perfil.id);
+      }
+
+      const salt = bcrypt.genSaltSync();
+      dados.senha = bcrypt.hashSync(dados.senha, salt);
 
       delete dados.perfis;
       const [id] = await db('tb_usuario').insert(dados);
@@ -27,6 +48,7 @@ module.exports = {
       throw new Error(e.sqlMessage);
     }
   },
+
   async excluirUsuario(_, args) {
     try {
       const usuario = await obterUsuario(_, args);
@@ -40,6 +62,7 @@ module.exports = {
       throw new Error(e.sqlMessage);
     }
   },
+
   async alterarUsuario(_, { filtro, dados }) {
     try {
       const usuario = await obterUsuario(_, { filtro });
@@ -62,6 +85,11 @@ module.exports = {
           }
         }
 
+        if (dados.senha) {
+          const salt = bcrypt.genSaltSync();
+          dados.senha = bcrypt.hashSync(dados.senha, salt);
+        }
+
         delete dados.perfis;
         await db('tb_usuario').where({ id }).update(dados);
       }
@@ -71,3 +99,5 @@ module.exports = {
     }
   },
 };
+
+module.exports = mutations;
