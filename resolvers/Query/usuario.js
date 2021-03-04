@@ -6,8 +6,6 @@ module.exports = {
   async login(_, { dados }) {
     const usuario = await db('tb_usuario').where({ email: dados.email }).first();
 
-    console.log(usuario);
-
     if (!usuario) {
       throw new Error('Usuário invalido');
     }
@@ -20,7 +18,7 @@ module.exports = {
 
     return getUsuarioLogado(usuario);
   },
-  usuarios() {
+  usuarios(obj, args, ctx) {
     return db('tb_usuario');
   },
   usuario(_, { filtro }) {
