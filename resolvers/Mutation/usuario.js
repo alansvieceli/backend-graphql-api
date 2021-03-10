@@ -14,7 +14,9 @@ const mutations = {
     });
   },
 
-  async novoUsuario(_, { dados }) {
+  async novoUsuario(_, { dados }, ctx) {
+    ctx && ctx.validarAdmin(); //if existe contexto executa a porra toda
+
     try {
       const idsPerfis = [];
 
@@ -49,7 +51,9 @@ const mutations = {
     }
   },
 
-  async excluirUsuario(_, args) {
+  async excluirUsuario(_, args, ctx) {
+    ctx && ctx.validarAdmin(); //if existe contexto executa a porra toda
+
     try {
       const usuario = await obterUsuario(_, args);
       if (usuario) {
@@ -63,7 +67,7 @@ const mutations = {
     }
   },
 
-  async alterarUsuario(_, { filtro, dados }) {
+  async alterarUsuario(_, { filtro, dados }, ctx) {
     try {
       const usuario = await obterUsuario(_, { filtro });
       if (usuario) {
